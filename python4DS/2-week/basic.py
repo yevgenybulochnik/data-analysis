@@ -6,6 +6,5 @@ print(list_one)
 print(list_two)
 
 # dictionary comprehension 
-
 alpha_dict = {i : chr(i) for i in range(65,91)}
 print(alpha_dict)
