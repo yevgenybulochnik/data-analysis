@@ -1,6 +1,6 @@
 import random
 
-print("I'm thinking of a number 1-100 can you guess it?")
+print("Pick a number 1-100 and I will guess it.\n")
 
 start = 1
 end = 100
