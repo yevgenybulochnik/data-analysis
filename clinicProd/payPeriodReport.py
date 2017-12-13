@@ -75,3 +75,14 @@ def data_adj(filename):
     data.encounter = data.encounter.astype('category', ordered=True, categories=encounter_cat)
     return data
 
+# Tables setup
+def encounter_period(data, clinic='All'):
+    if clinic != "All":
+        data = data[data.clinic.str.contains(clinic)]
+    pivot = data.pivot_table(index='prov', columns='encounter', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
+    pivot = pivot.loc[:, (pivot != 0).any(axis=0)]
+    pivot.sort_values('Total', ascending=False, inplace=True)
+    pivot.drop(['Total'], inplace=True)
+    pivot.loc['Total'] = pivot.sum()
+    return pivot.rename_axis(None)
+
