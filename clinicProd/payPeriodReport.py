@@ -12,7 +12,7 @@ def clinic_relabel(clinic):
     match = re.match(pattern, clinic)
     if match:
         clinic_name = match.group(1)[:3]
-        if match.group(2) == "GRESH":
+        if match.group(2) == "GRSH":
             clinic_name += ' G'
         if match.group(3) == 'TEL':
             clinic_name += ' T'
@@ -62,3 +62,16 @@ def provider_relabel(provider):
             return initials.upper()
     else:
         return f"Invalid Provider '{provider}'"
+
+# Raw data manipulation
+def data_adj(filename):
+    month_cat =['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    encounter_cat = ['Return', 'Tele', 'PST', 'New Pt', 'Ext', 'DOAC', 'PST Teach', 'MS NP', 'MS Tel', 'NP Hep']
+    data = pd.read_csv(filename, usecols=['Date', 'Dept/Loc', 'Type', 'Prov/Res'])
+    data.columns = ['date', 'clinic', 'encounter', 'prov']
+    data.date = pd.to_datetime(data.date)
+    data.clinic = data.clinic.apply(lambda x: clinic_relabel(x))
+    data.encounter = data.encounter.apply(lambda x: encounter_relabel(x))
+    data.encounter = data.encounter.astype('category', ordered=True, categories=encounter_cat)
+    return data
+
