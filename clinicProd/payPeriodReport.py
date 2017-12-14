@@ -20,13 +20,13 @@ def clinic_relabel(clinic):
     else:
         return f"Invalid Clinic '{clinic}'"
 
-def encounter_relabel(encounter):
+def encounter_relabel(encounter, category=None):
     labels = {
         'New Pt': ['AC NEW PAT', 'AC NEW', 'AC NEW PT', 'AC NP', 'NP'],
         'Return': ['AC RET PT', 'AC RETURN', 'AC RETURN PT', 'AC RTRN PT', 'OVR'],
         'PST': ['OMW PST', 'AC PST', 'PST', 'OSV PST'],
         'PST Teach': ['PST TEACH', 'AC PST TEACH', 'AC PST Teach','AC PST TEACH'],
-        'Ext' : ['AC EXTEND', 'AC EXTENDED ', 'AC EXT', 'OSV AC EX', 'OVE'],
+        'Ext' : ['AC EXTEND', 'AC EXTENDED', 'AC EXT', 'OSV AC EX', 'OVE'],
         'Tele': ['AC PHONE', 'ONB TELEPHON', 'AC PHONE','AC PHONE', 'OMW AC TELE', 'ONB AC TELE', 'OPH AC TELE', 'OSV AC TELE', 'tele visit'],
         'MS NP': ['NP MS', 'NP MS'],
         'MS Tel' : ['MS TELE', 'MS TELE'],
@@ -43,6 +43,9 @@ def encounter_relabel(encounter):
                 found = True
                 return abv
         if not found:
+            if category:
+                if encounter not in category:
+                    category.append(encounter)
             return encounter
     else:
         return f"Invalid Encounter '{encounter}'"
@@ -70,8 +73,9 @@ def data_adj(filename):
     data = pd.read_csv(filename, usecols=['Date', 'Dept/Loc', 'Type', 'Prov/Res'])
     data.columns = ['date', 'clinic', 'encounter', 'prov']
     data.date = pd.to_datetime(data.date)
-    data.clinic = data.clinic.apply(lambda x: clinic_relabel(x))
-    data.encounter = data.encounter.apply(lambda x: encounter_relabel(x))
+    data.clinic = data.clinic.apply(clinic_relabel)
+    # data.encounter = data.encounter.apply(encounter_relabel, args=(encounter_cat,))
+    data.encounter = data.encounter.apply(lambda x: encounter_relabel(x, encounter_cat))
     data.encounter = data.encounter.astype('category', ordered=True, categories=encounter_cat)
     return data
 
@@ -84,5 +88,15 @@ def encounter_period(data, clinic='All'):
     pivot.sort_values('Total', ascending=False, inplace=True)
     pivot.drop(['Total'], inplace=True)
     pivot.loc['Total'] = pivot.sum()
+    return pivot.rename_axis(None)
+
+def encounter_day(data, clinic='All'):
+    if clinic != "All":
+        data = data[data.clinic.str.contains(clinic)]
+    data['day'] = data.date.apply(lambda x: datetime.datetime.strftime(x, '%-m/%d'))
+    pivot = data.pivot_table(index='encounter', columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
+    pivot = pivot[pivot['Total'] > 0]
+    pivot['Total'] = pivot['Total'].astype(int)
+    pivot.loc["#Pharm"] = pivot.apply(lambda x: len(data[data.day == x.name].prov.unique()))
     return pivot.rename_axis(None)
 
