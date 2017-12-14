@@ -79,6 +79,7 @@ def data_adj(filename):
     # data.encounter = data.encounter.apply(encounter_relabel, args=(encounter_cat,))
     data.encounter = data.encounter.apply(lambda x: encounter_relabel(x, encounter_cat))
     data.encounter = data.encounter.astype('category', ordered=True, categories=encounter_cat)
+    data['day'] = data.date.apply(lambda x: datetime.datetime.strftime(x, '%-m/%d'))
     return data
 
 # Tables setup
@@ -95,10 +96,19 @@ def encounter_period(data, clinic='All'):
 def encounter_day(data, clinic='All'):
     if clinic != "All":
         data = data[data.clinic.str.contains(clinic)]
-    data['day'] = data.date.apply(lambda x: datetime.datetime.strftime(x, '%-m/%d'))
     pivot = data.pivot_table(index='encounter', columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
     pivot = pivot[pivot['Total'] > 0]
     pivot['Total'] = pivot['Total'].astype(int)
     pivot.loc["#Pharm"] = pivot.apply(lambda x: len(data[data.day == x.name].prov.unique()))
     return pivot.rename_axis(None)
 
+def provider_day(data, clinic='All'):
+    encounter_cat = ['Return', 'Tele', 'PST', 'New Pt', 'Ext', 'DOAC', 'PST Teach', 'MS NP', 'MS Rt', 'MS Tel', 'NP Hep', 'HP Tel']
+    if clinic != "All":
+        data = data[data.clinic.str.contains(clinic)]
+    pivot = data.pivot_table(index=['encounter', 'prov'], columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
+    pivot = pivot[pivot.loc[:]['Total'] > 0]
+    pivot = pivot.sort_values(by=['Total'], ascending=False).swaplevel(0,1).sort_index(level=1, sort_remaining=False).swaplevel(0,1)
+    pivot['Total'] = pivot['Total'].astype(int)
+    pivot = pivot.reindex(encounter_cat, level=0)
+    return pivot.rename_axis([None, None])
