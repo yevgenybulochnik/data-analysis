@@ -29,9 +29,11 @@ def encounter_relabel(encounter, category=None):
         'Ext' : ['AC EXTEND', 'AC EXTENDED', 'AC EXT', 'OSV AC EX', 'OVE'],
         'Tele': ['AC PHONE', 'ONB TELEPHON', 'AC PHONE','AC PHONE', 'OMW AC TELE', 'ONB AC TELE', 'OPH AC TELE', 'OSV AC TELE', 'tele visit'],
         'MS NP': ['NP MS', 'NP MS'],
+        'MS Rt': ['MS RETURN'],
         'MS Tel' : ['MS TELE', 'MS TELE'],
         'DOAC': ['OMW AC DOAC', 'ONB AC DOAC', 'ONB AC DOAC','OPH AC DOAC', 'OPH AC DOAC', 'OSV AC DOAC'],
-        'NP Hep': ['NP HEP', 'NP HEP 30']
+        'NP Hep': ['NP HEP', 'NP HEP 30'],
+        'HP Tel': ['HEP TELE']
         }
     pattern = r'(.+)(\s\[\d+\])'
     match = re.match(pattern, encounter)
@@ -69,7 +71,7 @@ def provider_relabel(provider):
 # Raw data manipulation
 def data_adj(filename):
     month_cat =['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-    encounter_cat = ['Return', 'Tele', 'PST', 'New Pt', 'Ext', 'DOAC', 'PST Teach', 'MS NP', 'MS Tel', 'NP Hep']
+    encounter_cat = ['Return', 'Tele', 'PST', 'New Pt', 'Ext', 'DOAC', 'PST Teach', 'MS NP', 'MS Rt', 'MS Tel', 'NP Hep', 'HP Tel']
     data = pd.read_csv(filename, usecols=['Date', 'Dept/Loc', 'Type', 'Prov/Res'])
     data.columns = ['date', 'clinic', 'encounter', 'prov']
     data.date = pd.to_datetime(data.date)
