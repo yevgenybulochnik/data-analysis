@@ -7,6 +7,8 @@ import os
 import re
 
 # Functions to relabel default clinics, encounters, and providers
+
+
 def clinic_relabel(clinic):
     pattern = r'([a-zA-z]+)\s?([a-zA-z]+)?\s?([a-zA-z]+)?\s?(\[\d+\])'
     match = re.match(pattern, clinic)
@@ -20,18 +22,19 @@ def clinic_relabel(clinic):
     else:
         return f"Invalid Clinic '{clinic}'"
 
+
 def encounter_relabel(encounter, category=None):
     labels = {
         'New Pt': ['AC NEW PAT', 'AC NEW', 'AC NEW PT', 'AC NP', 'NP'],
         'Return': ['AC RET PT', 'AC RETURN', 'AC RETURN PT', 'AC RTRN PT', 'OVR'],
         'PST': ['OMW PST', 'AC PST', 'PST', 'OSV PST'],
-        'PST Teach': ['PST TEACH', 'AC PST TEACH', 'AC PST Teach','AC PST TEACH'],
-        'Ext' : ['AC EXTEND', 'AC EXTENDED', 'AC EXT', 'OSV AC EX', 'OVE'],
-        'Tele': ['AC PHONE', 'ONB TELEPHON', 'AC PHONE','AC PHONE', 'OMW AC TELE', 'ONB AC TELE', 'OPH AC TELE', 'OSV AC TELE', 'tele visit'],
+        'PST Teach': ['PST TEACH', 'AC PST TEACH', 'AC PST Teach', 'AC PST TEACH'],
+        'Ext': ['AC EXTEND', 'AC EXTENDED', 'AC EXT', 'OSV AC EX', 'OVE'],
+        'Tele': ['AC PHONE', 'ONB TELEPHON', 'AC PHONE', 'AC PHONE', 'OMW AC TELE', 'ONB AC TELE', 'OPH AC TELE', 'OSV AC TELE', 'tele visit'],
         'MS NP': ['NP MS', 'NP MS'],
         'MS Rt': ['MS RETURN'],
-        'MS Tel' : ['MS TELE', 'MS TELE'],
-        'DOAC': ['OMW AC DOAC', 'ONB AC DOAC', 'ONB AC DOAC','OPH AC DOAC', 'OPH AC DOAC', 'OSV AC DOAC'],
+        'MS Tel': ['MS TELE', 'MS TELE'],
+        'DOAC': ['OMW AC DOAC', 'ONB AC DOAC', 'ONB AC DOAC', 'OPH AC DOAC', 'OPH AC DOAC', 'OSV AC DOAC'],
         'NP Hep': ['NP HEP', 'NP HEP 30'],
         'HP Tel': ['HEP TELE']
         }
@@ -52,6 +55,7 @@ def encounter_relabel(encounter, category=None):
     else:
         return f"Invalid Encounter '{encounter}'"
 
+
 def provider_relabel(provider):
     pattern = r"([a-zA-Z'-]+),\s([a-zA-z'-]+)\s?([a-zA-Z'-]+)?$"
     match = re.match(pattern, provider)
@@ -69,8 +73,10 @@ def provider_relabel(provider):
         return f"Invalid Provider '{provider}'"
 
 # Raw data manipulation
+
+
 def data_adj(filename):
-    month_cat =['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    # month_cat =['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
     encounter_cat = ['Return', 'Tele', 'PST', 'New Pt', 'Ext', 'DOAC', 'PST Teach', 'MS NP', 'MS Rt', 'MS Tel', 'NP Hep', 'HP Tel']
     data = pd.read_csv(filename, usecols=['Date', 'Dept/Loc', 'Type', 'Prov/Res'])
     data.columns = ['date', 'clinic', 'encounter', 'prov']
@@ -84,6 +90,8 @@ def data_adj(filename):
     return data
 
 # Tables setup
+
+
 def encounter_period(data, clinic='All'):
     if clinic != "All":
         data = data[data.clinic.str.contains(clinic)]
@@ -94,6 +102,7 @@ def encounter_period(data, clinic='All'):
     pivot.loc['Total'] = pivot.sum()
     return pivot.rename_axis(None)
 
+
 def encounter_day(data, clinic='All'):
     if clinic != "All":
         data = data[data.clinic.str.contains(clinic)]
@@ -103,20 +112,22 @@ def encounter_day(data, clinic='All'):
     pivot.loc["#Pharm"] = pivot.apply(lambda x: len(data[data.day == x.name].prov.unique()))
     return pivot.rename_axis(None)
 
+
 def provider_day(data, clinic='All'):
     encounter_cat = ['Return', 'Tele', 'PST', 'New Pt', 'Ext', 'DOAC', 'PST Teach', 'MS NP', 'MS Rt', 'MS Tel', 'NP Hep', 'HP Tel']
     if clinic != "All":
         data = data[data.clinic.str.contains(clinic)]
     pivot = data.pivot_table(index=['encounter', 'prov'], columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
     pivot = pivot[pivot.loc[:]['Total'] > 0]
-    pivot = pivot.sort_values(by=['Total'], ascending=False).swaplevel(0,1).sort_index(level=1, sort_remaining=False).swaplevel(0,1)
+    pivot = pivot.sort_values(by=['Total'], ascending=False).swaplevel(0, 1).sort_index(level=1, sort_remaining=False).swaplevel(0, 1)
     pivot['Total'] = pivot['Total'].astype(int)
     pivot = pivot.reindex(encounter_cat, level=0)
     return pivot.rename_axis([None, None])
+
 
 def provider_worked_days(data, clinic='All'):
     if clinic != "All":
         data = data[data.clinic.str.contains(clinic)]
     pivot = data.pivot_table(index='prov_initials', columns='clinic', values='date', aggfunc=lambda x: len(x.unique()), fill_value=0)
-    pivot.sort_values(by=pivot.iloc[:,0].name, ascending=False, inplace=True)
+    pivot.sort_values(by=pivot.iloc[:, 0].name, ascending=False, inplace=True)
     return pivot.rename_axis(None)
