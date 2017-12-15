@@ -80,6 +80,7 @@ def data_adj(filename):
     data.encounter = data.encounter.apply(lambda x: encounter_relabel(x, encounter_cat))
     data.encounter = data.encounter.astype('category', ordered=True, categories=encounter_cat)
     data['day'] = data.date.apply(lambda x: datetime.datetime.strftime(x, '%-m/%d'))
+    data['prov_initials'] = data.prov.apply(provider_relabel)
     return data
 
 # Tables setup
@@ -112,3 +113,10 @@ def provider_day(data, clinic='All'):
     pivot['Total'] = pivot['Total'].astype(int)
     pivot = pivot.reindex(encounter_cat, level=0)
     return pivot.rename_axis([None, None])
+
+def provider_worked_days(data, clinic='All'):
+    if clinic != "All":
+        data = data[data.clinic.str.contains(clinic)]
+    pivot = data.pivot_table(index='prov_initials', columns='clinic', values='date', aggfunc=lambda x: len(x.unique()), fill_value=0)
+    pivot.sort_values(by=pivot.iloc[:,0].name, ascending=False, inplace=True)
+    return pivot.rename_axis(None)
