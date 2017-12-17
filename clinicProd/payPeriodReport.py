@@ -131,3 +131,53 @@ def provider_worked_days(data, clinic='All'):
     pivot = data.pivot_table(index='prov_initials', columns='clinic', values='date', aggfunc=lambda x: len(x.unique()), fill_value=0)
     pivot.sort_values(by=pivot.iloc[:, 0].name, ascending=False, inplace=True)
     return pivot.rename_axis(None)
+
+
+def provadj_days(data, clinic='All'):
+    def num_eq(value):
+        split = value.split('(')
+        split[1] = split[1][:-1]
+        if split[0] == split[1]:
+            return split[0]
+        else:
+            return value
+
+    def adj_total(value):
+        if value.find('(') != -1:
+            split = value.split('(')
+            total = split[1][:-1]
+            return int(total)
+        else:
+            return int(value)
+    if clinic != "All":
+        data = data[data.clinic.str.contains(clinic)]
+    pivot = data.pivot_table(index=['prov', 'encounter'], columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
+    pivot = pivot[pivot.loc[:]['Total'] > 0]
+    pivot['Total'] = pivot['Total'].astype(int)
+
+    providers = pivot.index.levels[0]
+    adj = {'New Pt': 3, 'Ext': 2}
+
+    prov_series = []
+
+    for provider in providers:
+        adj_pivot = pivot.loc[provider]
+        adj_pivot.loc['Total'] = adj_pivot.sum()
+        adj_enc = []
+        total_dif = 0
+        for encounter in adj:
+            if encounter in adj_pivot.index:
+                adj_enc.append(adj_pivot.loc[encounter].apply(lambda x: x * adj[encounter]) - adj_pivot.loc[encounter])
+        for encounter in adj_enc:
+            total_dif += encounter
+        total_dif += adj_pivot.loc['Total']
+        adj_pivot.loc['Total'] = adj_pivot.loc['Total'].astype(str) + '(' + total_dif.astype(str) + ')'
+        adj_pivot.loc['Total'] = adj_pivot.loc['Total'].apply(num_eq)
+        prov_series.append(adj_pivot.loc['Total'].rename(provider))
+
+    adj_table = pd.concat(prov_series, axis=1).transpose()
+    adj_table['adj_total'] = adj_table['Total'].apply(adj_total)
+    adj_table.sort_values('adj_total', ascending=False, inplace=True)
+    adj_table.drop(['adj_total'], axis=1, inplace=True)
+    adj_table.drop(['Total'], inplace=True)
+    return adj_table
