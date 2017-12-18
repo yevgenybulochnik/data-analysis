@@ -194,4 +194,8 @@ def encounter_day_chart(encounter_day):
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
     ax = plt.axes()
     ax.yaxis.grid(linestyle='dashed')
+    ax.set_ylim([0, 175])
+    plt.title('Encounters Per Day')
+    plt.xlabel('Dates')
+    plt.ylabel('Total Encounters')
     return chart
