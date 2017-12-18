@@ -181,3 +181,17 @@ def provadj_days(data, clinic='All'):
     adj_table.drop(['adj_total'], axis=1, inplace=True)
     adj_table.drop(['Total'], inplace=True)
     return adj_table
+
+# Chart setup
+
+
+def encounter_day_chart(encounter_day):
+    encounter_day.drop(['Total'], inplace=True)
+    encounter_day.drop(['Total'], axis=1, inplace=True)
+    encounter_day.drop(['#Pharm'], inplace=True)
+    df = encounter_day.transpose()
+    chart = df.plot(kind='bar', stacked=True, figsize=(7, 7))
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    ax = plt.axes()
+    ax.yaxis.grid(linestyle='dashed')
+    return chart
