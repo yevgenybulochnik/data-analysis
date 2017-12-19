@@ -5,6 +5,7 @@ from weasyprint import HTML, CSS
 from wand.image import Image as WImage
 import os
 import re
+from string import Template
 
 # Functions to relabel default clinics, encounters, and providers
 
@@ -93,7 +94,7 @@ def data_adj(filename):
 
 
 def encounter_period(data, clinic='All'):
-    if clinic != "All":
+    if clinic != 'All':
         data = data[data.clinic.str.contains(clinic)]
     pivot = data.pivot_table(index='prov', columns='encounter', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
     pivot = pivot.loc[:, (pivot != 0).any(axis=0)]
@@ -104,7 +105,7 @@ def encounter_period(data, clinic='All'):
 
 
 def encounter_day(data, clinic='All'):
-    if clinic != "All":
+    if clinic != 'All':
         data = data[data.clinic.str.contains(clinic)]
     pivot = data.pivot_table(index='encounter', columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
     pivot = pivot[pivot['Total'] > 0]
@@ -198,4 +199,23 @@ def encounter_day_chart(encounter_day):
     plt.title('Encounters Per Day')
     plt.xlabel('Dates')
     plt.ylabel('Total Encounters')
+    plt.savefig('./chart.png', bbox_inches='tight')
     return chart
+
+# PDF setup
+
+
+def clinic_html(data, clinic='All'):
+    if clinic != 'All':
+        data = data[data.clinic.str.contains(clinic)]
+    encounter_day_chart(encounter_day(data))
+    tables = {
+        'provider_day': provider_day(data).to_html(),
+        'chart': os.path.abspath('./chart.png'),
+        'encounter_period': encounter_period(data).to_html(),
+        'encounter_day': encounter_day(data).to_html(),
+        'provider_worked_days': provider_worked_days(data).to_html()
+        }
+    template = Template(open('./templates/clinic.html').read())
+    html = template.substitute(tables)
+    return html
