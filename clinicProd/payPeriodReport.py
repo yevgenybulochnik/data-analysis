@@ -210,6 +210,7 @@ def clinic_html(data, clinic='All'):
         data = data[data.clinic.str.contains(clinic)]
     encounter_day_chart(encounter_day(data))
     tables = {
+        'clinic': clinic,
         'provider_day': provider_day(data).to_html(),
         'chart': os.path.abspath('./chart.png'),
         'encounter_period': encounter_period(data).to_html(),
