@@ -205,6 +205,19 @@ def encounter_day_chart(encounter_day):
 # PDF setup
 
 
+def cover_html():
+    return
+
+
+def overview_html(data, clinic='All'):
+    tables = {
+        'provadj_days': provadj_days(data, clinic).to_html()
+        }
+    template = Template(open('./templates/overview.html').read())
+    html = template.substitute(tables)
+    return html
+
+
 def clinic_html(data, clinic='All'):
     if clinic != 'All':
         data = data[data.clinic.str.contains(clinic)]

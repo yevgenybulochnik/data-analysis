@@ -71,3 +71,11 @@ tr:nth-child(odd) {background: #FFF}
 .type{
     background: white;
 }
+
+.provadj_days{
+    font-family: Arial;
+    font-size: 13px;
+    display: table;
+    margin: 0 auto;
+    padding-top: 100px;
+}
