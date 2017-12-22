@@ -211,7 +211,7 @@ def cover_html():
 
 def overview_html(data, clinic='All'):
     tables = {
-        'provadj_days': provadj_days(data, clinic).to_html()
+        'provadj_days': provadj_days(data, clinic).to_html().replace('day', 'Total Adjusted Encounters')
         }
     template = Template(open('./templates/overview.html').read())
     html = template.substitute(tables)
@@ -224,11 +224,11 @@ def clinic_html(data, clinic='All'):
     encounter_day_chart(encounter_day(data))
     tables = {
         'clinic': clinic,
-        'provider_day': provider_day(data).to_html(),
+        'provider_day': provider_day(data).to_html().replace('day', 'Encounters by Type'),
         'chart': os.path.abspath('./chart.png'),
-        'encounter_period': encounter_period(data).to_html(),
-        'encounter_day': encounter_day(data).to_html(),
-        'provider_worked_days': provider_worked_days(data).to_html()
+        'encounter_period': encounter_period(data).to_html().replace('encounter', ''),
+        'encounter_day': encounter_day(data).to_html().replace('day', ''),
+        'provider_worked_days': provider_worked_days(data).to_html().replace('clinic', '')
         }
     template = Template(open('./templates/clinic.html').read())
     html = template.substitute(tables)
