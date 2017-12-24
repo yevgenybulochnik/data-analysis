@@ -233,3 +233,10 @@ def clinic_html(data, clinic='All'):
     template = Template(open('./templates/clinic.html').read())
     html = template.substitute(tables)
     return html
+
+def clinic_pdf():
+    return
+
+
+def pay_period_pdf():
+    return
