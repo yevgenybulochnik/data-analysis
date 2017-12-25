@@ -234,9 +234,11 @@ def clinic_html(data, clinic='All'):
     html = template.substitute(tables)
     return html
 
-def clinic_pdf():
+def clinic_pdf(csv_file):
+    data = data_adj(csv_file)
     return
 
 
-def pay_period_pdf():
+def pay_period_pdf(csv_file):
+    data = data_adj(csv_file)
     return
