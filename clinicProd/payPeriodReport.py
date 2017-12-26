@@ -239,8 +239,9 @@ def clinic_pdf(csv_file, clinic='All'):
     data = data_adj(csv_file)
     documents = []
     pages = []
-    documents.append(HTML(string=overview_html(data, clinic)).render(stylesheets=['./templates/clinic.css']))
-    documents.append(HTML(string=clinic_html(data, clinic)).render(stylesheets=['./templates/clinic.css']))
+    stylesheets = ['./templates/page.css', './templates/clinic.css']
+    documents.append(HTML(string=overview_html(data, clinic)).render(stylesheets=stylesheets))
+    documents.append(HTML(string=clinic_html(data, clinic)).render(stylesheets=stylesheets))
     for doc in documents:
         for page in doc.pages:
             pages.append(page)
@@ -251,11 +252,12 @@ def clinic_pdf(csv_file, clinic='All'):
 def pay_period_pdf(csv_file):
     data = data_adj(csv_file)
     documents = []
+    stylesheets = ['./templates/page.css', './templates/clinic.css']
     pages = []
-    documents.append(HTML(string=overview_html(data)).render(stylesheets=['./templates/clinic.css']))
+    documents.append(HTML(string=overview_html(data)).render(stylesheets=stylesheets))
     for clinic in data.clinic.unique():
         if clinic != 'OSV':
-            documents.append(HTML(string=clinic_html(data, clinic)).render(stylesheets=['./templates/clinic.css']))
+            documents.append(HTML(string=clinic_html(data, clinic)).render(stylesheets=stylesheets))
     for doc in documents:
         for page in doc.pages:
             pages.append(page)
