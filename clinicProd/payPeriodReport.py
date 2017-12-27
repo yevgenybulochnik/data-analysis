@@ -255,12 +255,10 @@ def clinic_pdf(csv_file, clinic='All'):
 def pay_period_pdf(csv_file):
     data = data_adj(csv_file)
     documents = []
-    stylesheets = ['./templates/page.css', './templates/clinic.css']
     pages = []
-    documents.append(HTML(string=overview_html(data)).render(stylesheets=stylesheets))
+    documents.append(overview_doc(data))
     for clinic in data.clinic.unique():
-        if clinic != 'OSV':
-            documents.append(HTML(string=clinic_html(data, clinic)).render(stylesheets=stylesheets))
+        documents.append(clinic_doc(data, clinic))
     for doc in documents:
         for page in doc.pages:
             pages.append(page)
