@@ -1,13 +1,29 @@
+.pane1{
+    width: 100%;
+    display: inline-block;
+}
 .provider_day{
     font-family: Arial;
-    font-size: 9px;//11px;
+    font-size: 9px;
     float: left;
+    margin: 2%;
 }
 .chart{
-    float: left;
     width: 415px;
-    padding-left: 40px;
-    padding-top: 20px;
+    float: left;
+    margin: 2%;
+}
+.pane2{
+}
+.container{
+    display: table;
+    margin: auto;
+}
+.inner{
+    display: inline;
+}
+.inner>div{
+    margin: 10px;
 }
 .encounter_period{
     font-family: Arial;
@@ -18,27 +34,12 @@
     font-family: Arial;
     font-size: 11px;
     float: left;
-    padding-left: 10px;
 }
 .provider_worked_days{
     font-family: Arial;
     font-size: 11px;
     float: left;
-    padding-left: 10px;
-    padding-top: 9px;
 }
-.pane1{
-    float: left;
-    width: 100%
-}
-.pane2{
-    padding-top: 20px;
-    clear: left;
-}
-.type{
-    background: white;
-}
-
 .provadj_days{
     font-family: Arial;
     font-size: 13px;
