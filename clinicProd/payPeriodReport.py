@@ -209,16 +209,16 @@ def cover_html():
     return
 
 
-def overview_html(data, clinic='All'):
+def overview_doc(data, clinic='All'):
     tables = {
         'provadj_days': provadj_days(data, clinic).to_html().replace('day', 'Total Adjusted Encounters')
         }
     template = Template(open('./templates/overview.html').read())
-    html = template.substitute(tables)
-    return html
+    doc = HTML(string=template.substitute(tables)).render(stylesheets=['./templates/page.css', './templates/overview.css'])
+    return doc
 
 
-def clinic_html(data, clinic='All'):
+def clinic_doc(data, clinic='All'):
     if clinic != 'All':
         data = data[data.clinic.str.contains(clinic)]
     encounter_day_chart(encounter_day(data))
@@ -230,18 +230,21 @@ def clinic_html(data, clinic='All'):
         'encounter_day': encounter_day(data).to_html().replace('day', ''),
         'provider_worked_days': provider_worked_days(data).to_html().replace('clinic', '')
         }
-    template = Template(open('./templates/clinic.html').read())
-    html = template.substitute(tables)
-    return html
+    if clinic == 'OSV':
+        template = Template(open('./templates/large.html').read())
+        doc = HTML(string=template.substitute(tables)).render(stylesheets=['./templates/page.css', './templates/large.css'])
+    else:
+        template = Template(open('./templates/clinic.html').read())
+        doc = HTML(string=template.substitute(tables)).render(stylesheets=['./templates/page.css', './templates/clinic.css'])
+    return doc
 
 
 def clinic_pdf(csv_file, clinic='All'):
     data = data_adj(csv_file)
     documents = []
     pages = []
-    stylesheets = ['./templates/page.css', './templates/clinic.css']
-    documents.append(HTML(string=overview_html(data, clinic)).render(stylesheets=stylesheets))
-    documents.append(HTML(string=clinic_html(data, clinic)).render(stylesheets=stylesheets))
+    documents.append(overview_doc(data, clinic))
+    documents.append(clinic_doc(data, clinic))
     for doc in documents:
         for page in doc.pages:
             pages.append(page)
