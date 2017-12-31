@@ -57,13 +57,15 @@ def encounter_relabel(encounter, category=None):
         return f"Invalid Encounter '{encounter}'"
 
 
-def provider_relabel(provider):
+def provider_relabel(provider, abr='initials'):
     pattern = r"([a-zA-Z'-]+),\s([a-zA-z'-]+)\s?([a-zA-Z'-]+)?$"
     match = re.match(pattern, provider)
     if match:
         lastname = match.group(1)
         firstname = match.group(2)
         middlename = match.group(3)
+        if abr == 'firstname':
+            return f'{firstname} {lastname[0]}'
         if middlename:
             initials = firstname[0] + middlename[0] + lastname[0]
             return initials.upper()
@@ -88,6 +90,7 @@ def data_adj(filename):
     data.encounter = data.encounter.astype('category', ordered=True, categories=encounter_cat)
     data['day'] = data.date.apply(lambda x: datetime.datetime.strftime(x, '%-m/%d'))
     data['prov_initials'] = data.prov.apply(provider_relabel)
+    data['prov_firstname'] = data.prov.apply(lambda x: provider_relabel(x, 'firstname'))
     return data
 
 # Tables setup
@@ -118,7 +121,7 @@ def provider_day(data, clinic='All'):
     encounter_cat = ['Return', 'Tele', 'PST', 'New Pt', 'Ext', 'DOAC', 'PST Teach', 'MS NP', 'MS Rt', 'MS Tel', 'NP Hep', 'HP Tel']
     if clinic != "All":
         data = data[data.clinic.str.contains(clinic)]
-    pivot = data.pivot_table(index=['encounter', 'prov'], columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
+    pivot = data.pivot_table(index=['encounter', 'prov_firstname'], columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
     pivot = pivot[pivot.loc[:]['Total'] > 0]
     pivot = pivot.sort_values(by=['Total'], ascending=False).swaplevel(0, 1).sort_index(level=1, sort_remaining=False).swaplevel(0, 1)
     pivot['Total'] = pivot['Total'].astype(int)
@@ -152,7 +155,7 @@ def provadj_days(data, clinic='All'):
             return int(value)
     if clinic != "All":
         data = data[data.clinic.str.contains(clinic)]
-    pivot = data.pivot_table(index=['prov', 'encounter'], columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
+    pivot = data.pivot_table(index=['prov_firstname', 'encounter'], columns='day', values='date', aggfunc=len, fill_value=0, margins=True, margins_name='Total')
     pivot = pivot[pivot.loc[:]['Total'] > 0]
     pivot['Total'] = pivot['Total'].astype(int)
 
