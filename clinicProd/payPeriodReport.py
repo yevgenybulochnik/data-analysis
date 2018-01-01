@@ -267,3 +267,15 @@ def pay_period_pdf(csv_file):
             pages.append(page)
     pdf = documents[0].copy(pages)
     return pdf.write_pdf('./pay_period_report.pdf')
+
+
+# Excel Spreadsheets
+
+def provadj_days_excel(csv_file):
+    data = data_adj(csv_file)
+    writer = pd.ExcelWriter('payperiod.xlsx', engine='xlsxwriter')
+    clinics = ['OSV', 'OPH', 'ONB', 'OMW|PMG T', 'PMG G']
+    for clinic in clinics:
+        df = provadj_days(data, clinic)
+        df.to_excel(writer, sheet_name=clinic)
+    return writer.save()
