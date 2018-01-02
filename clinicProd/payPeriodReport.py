@@ -73,7 +73,7 @@ def provider_relabel(provider, abr='initials'):
             initials = firstname[0] + lastname[0]
             return initials.upper()
     else:
-        return f"Invalid Provider '{provider}'"
+        return f'{provider}'
 
 # Raw data manipulation
 
