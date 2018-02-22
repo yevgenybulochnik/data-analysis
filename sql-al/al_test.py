@@ -22,9 +22,7 @@ class User(Base):
     password = Column(String)
 
     def __repr__(self):
-        return f'<User(name={self.name},\
-        fullname={self.fullname},\
-        password={self.password})'
+        return f'<User(name={self.name}, fullname={self.fullname}, password={self.password})>'
 
     @property
     def serialize(self):
@@ -40,22 +38,21 @@ Base.metadata.create_all(engine)
 
 # Descriptions vs Full Descriptions
 # Primary key requires a sql sequence, firebird Oracle db
-'''
-from sqlalchemy import Sequence
 
-class User(Base):
-    __tablename__ = 'users'
+# from sqlalchemy import Sequence
 
-    id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
-    name = Column(String(50))
-    fullname = Column(String(50)) # specific len of string
-    password = Column(String(12))
+# class User(Base):
+    # __tablename__ = 'users'
 
-    def __repr__(self):
-        return f'<User(name={self.name},\
-        fullname={self.fullname},\
-        password={self.password})'
-'''
+    # id = Column(Integer, Sequence('user_id_seq'), primary_key=True)
+    # name = Column(String(50))
+    # fullname = Column(String(50)) # specific len of string
+    # password = Column(String(12))
+
+    # def __repr__(self):
+        # return f'<User(name={self.name},\
+        # fullname={self.fullname},\
+        # password={self.password})'
 
 # Test user object
 
@@ -63,7 +60,7 @@ ed_user = User(name='ed', fullname='Ed Jones', password='edspassword')
 print(ed_user.name)
 print(ed_user.fullname)
 print(ed_user.password)
-print(str(ed_user.id))  # returns None
+print(str(ed_user.id))  # returns None as data has not been commited to db
 print(ed_user.serialize)
 
 # Create session to talk with the db
@@ -71,3 +68,35 @@ from sqlalchemy.orm import sessionmaker
 
 Session = sessionmaker(bind=engine)
 session = Session()
+
+# Persist ed_user object, add to db
+session.add(ed_user)  # no entry created yet, data needs to be flushed
+
+# Query or user ed, this will flush data then query the db
+our_user = session.query(User).filter_by(name='ed').first()
+
+# our_user and ed_user reference the same object and row in the db
+print(our_user is ed_user)  # True
+
+# Add more users
+session.add_all([
+    User(name='wendy', fullname='Wendy Williams', password='foobar'),
+    User(name='mary', fullname='Mary Contrary', password='xxg527'),
+    User(name='fred', fullname='Fred Flinstone', password='blah')
+])
+
+# Change the password for ed
+ed_user.password = 'f8s7ccs'
+
+# Session knows when data has been change, like ed_user's password
+print(session.dirty)
+
+# Session also know that three new objects are pending
+print(session.new)
+
+# Commit changes to db including INSERT on new users and UPDATE on ed
+session.commit()
+
+# commit flushes changes to db and commits transactions
+# ed_user id is now set to 1 instead of None
+print(ed_user.id)
