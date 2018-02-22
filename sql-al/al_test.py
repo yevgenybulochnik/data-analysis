@@ -100,3 +100,14 @@ session.commit()
 # commit flushes changes to db and commits transactions
 # ed_user id is now set to 1 instead of None
 print(ed_user.id)
+
+# Rollback changes within a session
+ed_user.name = 'Edwardo'
+fake_user = User(name='fakeuser', fullname='Invalid', password='12345')
+session.add(fake_user)
+session.query(User).filter(User.name.in_(['Edwardo', 'fakeuser'])).all()
+
+# Rollback above changes
+session.rollback()
+print(ed_user.name)  # u'ed'
+print(fake_user in session)  # False
