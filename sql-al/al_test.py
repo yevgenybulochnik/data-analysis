@@ -111,3 +111,41 @@ session.query(User).filter(User.name.in_(['Edwardo', 'fakeuser'])).all()
 session.rollback()
 print(ed_user.name)  # u'ed'
 print(fake_user in session)  # False
+
+# Querying
+for instance in session.query(User).order_by(User.id):
+    print(instance.name, instance.fullname)
+
+for name, fullname in session.query(User.name, User.fullname):
+    print(name, fullname)
+
+# Use the User table class to get itmes
+for row in session.query(User, User.name).all():
+    print(row.User, row.name)
+
+# Relabel a column expresssion
+for row in session.query(User.name.label('name_label')).all():
+    print(row.name_label)
+
+# Relabel table/class name
+from sqlalchemy.orm import aliased
+
+user_alias = aliased(User, name='user_alias')
+for row in session.query(user_alias, user_alias.name).all():
+    print(row.user_alias)
+
+# Limit a query
+for u in session.query(User).order_by(User.id)[1:3]:
+    print(u)
+
+# Filter query
+for name, in session.query(User.name).filter_by(fullname='Ed Jones'):  # comma needed to git single result
+    print(name)
+
+# Filter function
+for name, in session.query(User.name).filter(User.fullname == 'Ed Jones'):
+    print(name)
+
+# Chained filters, work like AND
+for user in session.query(User).filter(User.name == 'ed').filter(User.fullname == 'Ed Jones'):
+    print(user)
