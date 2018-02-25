@@ -149,3 +149,9 @@ for name, in session.query(User.name).filter(User.fullname == 'Ed Jones'):
 # Chained filters, work like AND
 for user in session.query(User).filter(User.name == 'ed').filter(User.fullname == 'Ed Jones'):
     print(user)
+
+# Common filter operators
+
+# like, case-insensitive on some backends and not others, ilike is case-insensitive
+for user in session.query(User).filter(User.name.like('%ed%')):
+    print(user.name)
