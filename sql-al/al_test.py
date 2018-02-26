@@ -155,3 +155,10 @@ for user in session.query(User).filter(User.name == 'ed').filter(User.fullname =
 # like, case-insensitive on some backends and not others, ilike is case-insensitive
 for user in session.query(User).filter(User.name.like('%ed%')):
     print(user.name)
+
+# in filter
+for user in session.query(User).filter(User.name.in_(['ed', 'wendy', 'jack'])):
+    print(user.name)
+
+for user in session.query(User).filter(User.name.in_(session.query(User.name).filter(User.name.like('%ed%')))):
+    print(user.name)
