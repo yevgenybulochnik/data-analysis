@@ -162,3 +162,7 @@ for user in session.query(User).filter(User.name.in_(['ed', 'wendy', 'jack'])):
 
 for user in session.query(User).filter(User.name.in_(session.query(User.name).filter(User.name.like('%ed%')))):
     print(user.name)
+
+# not in
+for user in session.query(User).filter(~User.name.in_(['ed', 'wendy', 'jack'])):
+    print(user.name)
