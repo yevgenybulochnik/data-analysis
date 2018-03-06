@@ -182,3 +182,9 @@ for user in session.query(User).filter(User.name == 'ed').filter(User.fullname =
 from sqlalchemy import or_
 for user in session.query(User).filter(or_(User.name == 'ed', User.name == 'wendy')):
     print(user)
+
+# returning lists and scalars
+query = session.query(User).filter(User.name.like('%ed%'))
+print(query.all()) # returns list of query results
+print(query.first()) # returns only first result
+print(query.limit(2).all()) # specify number of results
