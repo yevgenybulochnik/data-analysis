@@ -166,3 +166,19 @@ for user in session.query(User).filter(User.name.in_(session.query(User.name).fi
 # not in
 for user in session.query(User).filter(~User.name.in_(['ed', 'wendy', 'jack'])):
     print(user.name)
+
+# and, can be done multiple ways
+from sqlalchemy import and_
+for user in session.query(User).filter(and_(User.name == 'ed', User.fullname == 'Ed Jones')):
+    print(user)
+
+for user in session.query(User).filter(User.name == 'ed', User.fullname == 'Ed Jones'):
+    print(user)
+
+for user in session.query(User).filter(User.name == 'ed').filter(User.fullname == 'Ed Jones'):
+    print(user)
+
+# or
+from sqlalchemy import or_
+for user in session.query(User).filter(or_(User.name == 'ed', User.name == 'wendy')):
+    print(user)
