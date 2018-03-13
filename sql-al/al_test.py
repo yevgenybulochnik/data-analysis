@@ -188,3 +188,8 @@ query = session.query(User).filter(User.name.like('%ed%'))
 print(query.all()) # returns list of query results
 print(query.first()) # returns only first result
 print(query.limit(2).all()) # specify number of results
+
+# Counts
+from sqlalchemy import func
+agg = session.query(func.count(User.name), User.name).group_by(User.name).all()
+print(agg)
